@@ -4995,6 +4995,7 @@
 					"gitlens.advanced.messages": {
 						"type": "object",
 						"default": {
+							"suppressBitbucketPRCommitLinksAppNotInstalledWarning": false,
 							"suppressCommitHasNoPreviousCommitWarning": false,
 							"suppressCommitNotFoundWarning": false,
 							"suppressCreatePullRequestPrompt": false,
