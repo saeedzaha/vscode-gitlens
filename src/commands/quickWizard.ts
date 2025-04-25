@@ -2,16 +2,26 @@ import type { Container } from '../container';
 import type { LaunchpadCommandArgs } from '../plus/launchpad/launchpad';
 import type { AssociateIssueWithBranchCommandArgs, StartWorkCommandArgs } from '../plus/startWork/startWork';
 import { command } from '../system/-webview/command';
+import type { ChangeUserDefinedMergeBaseCommandArgs } from './changeUserDefinedMergeBase';
 import type { CommandContext } from './commandContext';
 import type { QuickWizardCommandArgsWithCompletion } from './quickWizard.base';
 import { QuickWizardCommandBase } from './quickWizard.base';
 
-export type QuickWizardCommandArgs = LaunchpadCommandArgs | StartWorkCommandArgs | AssociateIssueWithBranchCommandArgs;
+export type QuickWizardCommandArgs =
+	| LaunchpadCommandArgs
+	| StartWorkCommandArgs
+	| AssociateIssueWithBranchCommandArgs
+	| ChangeUserDefinedMergeBaseCommandArgs;
 
 @command()
 export class QuickWizardCommand extends QuickWizardCommandBase {
 	constructor(container: Container) {
-		super(container, ['gitlens.showLaunchpad', 'gitlens.startWork', 'gitlens.associateIssueWithBranch']);
+		super(container, [
+			'gitlens.showLaunchpad',
+			'gitlens.startWork',
+			'gitlens.associateIssueWithBranch',
+			'gitlens.changeUserDefinedMergeBase',
+		]);
 	}
 
 	protected override preExecute(context: CommandContext, args?: QuickWizardCommandArgsWithCompletion): Promise<void> {
@@ -24,6 +34,9 @@ export class QuickWizardCommand extends QuickWizardCommandBase {
 
 			case 'gitlens.associateIssueWithBranch':
 				return this.execute({ command: 'associateIssueWithBranch', ...args });
+
+			case 'gitlens.changeUserDefinedMergeBase':
+				return this.execute({ command: 'changeUserDefinedMergeBase', ...args });
 
 			default:
 				return this.execute(args);

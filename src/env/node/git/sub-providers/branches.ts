@@ -573,24 +573,29 @@ export class BranchesGitSubProvider implements GitBranchesSubProvider {
 		try {
 			const pattern = `^branch\\.${ref}\\.`;
 			const data = await this.git.config__get_regex(pattern, repoPath);
+			const gkUserPriority = 1;
+			const gkDetectedPriority = 2;
+			const othersPriority = 3;
 			if (data) {
 				const regex = new RegExp(`${pattern}(.+) (.+)$`, 'gm');
 
 				let mergeBase: string | undefined;
+				const priority = Number.MAX_SAFE_INTEGER;
 				let update = false;
 				while (true) {
 					const match = regex.exec(data);
 					if (match == null) break;
 
 					const [, key, value] = match;
-					if (key === 'gk-merge-base') {
+					if (key === 'gk-user-defined-merge-base' && gkUserPriority <= priority) {
 						mergeBase = value;
 						update = false;
-						break;
-					} else if (key === 'vscode-merge-base') {
+					} else if (key === 'gk-merge-base' && gkDetectedPriority <= priority) {
+						mergeBase = value;
+						update = false;
+					} else if (key === 'vscode-merge-base' && othersPriority <= priority) {
 						mergeBase = value;
 						update = true;
-						continue;
 					}
 				}
 
@@ -619,6 +624,12 @@ export class BranchesGitSubProvider implements GitBranchesSubProvider {
 	async setBaseBranchName(repoPath: string, ref: string, base: string): Promise<void> {
 		const mergeBaseConfigKey: GitConfigKeys = `branch.${ref}.gk-merge-base`;
 
+		await this.provider.config.setConfig(repoPath, mergeBaseConfigKey, base);
+	}
+
+	@log()
+	async setUserDefinedBaseBranchName(repoPath: string, ref: string, base: string): Promise<void> {
+		const mergeBaseConfigKey: GitConfigKeys = `branch.${ref}.gk-user-defined-merge-base`;
 		await this.provider.config.setConfig(repoPath, mergeBaseConfigKey, base);
 	}
 

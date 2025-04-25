@@ -619,6 +619,7 @@ export type ContributedPaletteCommands =
 	| 'gitlens.browseRepoAtRevisionInNewWindow'
 	| 'gitlens.browseRepoBeforeRevision'
 	| 'gitlens.browseRepoBeforeRevisionInNewWindow'
+	| 'gitlens.changeUserDefinedMergeBase'
 	| 'gitlens.clearFileAnnotations'
 	| 'gitlens.closeUnchangedFiles'
 	| 'gitlens.compareHeadWith'

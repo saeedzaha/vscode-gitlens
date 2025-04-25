@@ -6086,6 +6086,11 @@
 				"enablement": "gitlens:enabled && resourceScheme =~ /^(gitlens|pr)$/"
 			},
 			{
+				"command": "gitlens.changeUserDefinedMergeBase",
+				"title": "Change Merge Target of a branch",
+				"category": "GitLens"
+			},
+			{
 				"command": "gitlens.clearFileAnnotations",
 				"title": "Clear File Annotations",
 				"category": "GitLens",
@@ -10369,6 +10374,10 @@
 				{
 					"command": "gitlens.browseRepoBeforeRevisionInNewWindow",
 					"when": "!gitlens:hasVirtualFolders && gitlens:enabled && resourceScheme =~ /^(gitlens|git|pr)$/"
+				},
+				{
+					"command": "gitlens.changeUserDefinedMergeBase",
+					"when": "gitlens:enabled && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
 				},
 				{
 					"command": "gitlens.clearFileAnnotations",

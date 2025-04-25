@@ -71,6 +71,10 @@
 			"enablement": "gitlens:enabled && resourceScheme =~ /^(gitlens|pr)$/",
 			"commandPalette": "!gitlens:hasVirtualFolders && gitlens:enabled && resourceScheme =~ /^(gitlens|git|pr)$/"
 		},
+		"gitlens.changeUserDefinedMergeBase": {
+			"label": "Change Merge Target of a branch",
+			"commandPalette": "gitlens:enabled && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
+		},
 		"gitlens.clearFileAnnotations": {
 			"label": "Clear File Annotations",
 			"icon": "$(gitlens-gitlens-filled)",

@@ -4,6 +4,7 @@ import { ActionRunnerType } from '../../api/actionRunners';
 import type { CreatePullRequestActionContext } from '../../api/gitlens';
 import type { EnrichedAutolink } from '../../autolinks/models/autolinks';
 import { getAvatarUriFromGravatarEmail } from '../../avatars';
+import type { ChangeUserDefinedMergeBaseCommandArgs } from '../../commands/changeUserDefinedMergeBase';
 import type { BranchGitCommandArgs } from '../../commands/git/branch';
 import type { OpenPullRequestOnRemoteCommandArgs } from '../../commands/openPullRequestOnRemote';
 import { GlyphChars, urls } from '../../constants';
@@ -333,6 +334,7 @@ export class HomeWebviewProvider implements WebviewProvider<State, State, HomeWe
 				(src?: Source) => this.container.subscription.validate({ force: true }, src),
 				this,
 			),
+			registerCommand('gitlens.home.changeUserDefinedMergeBase', this.changeUserDefinedMergeBase, this),
 			registerCommand('gitlens.home.deleteBranchOrWorktree', this.deleteBranchOrWorktree, this),
 			registerCommand('gitlens.home.pushBranch', this.pushBranch, this),
 			registerCommand('gitlens.home.openMergeTargetComparison', this.mergeTargetCompare, this),
@@ -486,6 +488,19 @@ export class HomeWebviewProvider implements WebviewProvider<State, State, HomeWe
 				suggestNameOnly: true,
 				suggestRepoOnly: true,
 				confirmOptions: ['--switch', '--worktree'],
+			},
+		});
+	}
+
+	@log<HomeWebviewProvider['changeUserDefinedMergeBase']>()
+	private changeUserDefinedMergeBase(ref: BranchAndTargetRefs) {
+		this.container.telemetry.sendEvent('home/changeUserDefinedMergeBase');
+		void executeCommand<ChangeUserDefinedMergeBaseCommandArgs>('gitlens.changeUserDefinedMergeBase', {
+			command: 'changeUserDefinedMergeBase',
+			state: {
+				repo: ref.repoPath,
+				branch: ref.branchName,
+				mergeBranch: ref.mergeTargetName,
 			},
 		});
 	}
