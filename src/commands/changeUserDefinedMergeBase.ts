@@ -4,7 +4,7 @@ import type { Repository } from '../git/models/repository';
 import type { ViewsWithRepositoryFolders } from '../views/viewBase';
 import type { PartialStepState, StepGenerator, StepState } from './quickCommand';
 import { endSteps, QuickCommand, StepResultBreak } from './quickCommand';
-import { pickBranchOrTagStep, pickBranchStep, pickRepositoryStep } from './quickCommand.steps';
+import { pickBranchStep, pickOrResetBranchStep, pickRepositoryStep } from './quickCommand.steps';
 
 interface Context {
 	repos: Repository[];
@@ -84,22 +84,30 @@ export class ChangeUserDefinedMergeBaseCommand extends QuickCommand {
 				state.branch = branches.name;
 			}
 
-			const result = yield* pickBranchOrTagStep(state, context, {
+			if (!state.mergeBranch) {
+				state.mergeBranch = await this.container.git
+					.branches(state.repo.path)
+					.getBaseBranchName?.(state.branch);
+			}
+
+			const detectedMergeTarget = await this.container.git
+				.branches(state.repo.path)
+				.getBaseBranchName?.(state.branch, true);
+
+			const result = yield* pickOrResetBranchStep(state, context, {
 				picked: state.mergeBranch,
 				placeholder: 'Pick a merge target branch',
-				value: undefined,
-				filter: {
-					branches: (branch: GitBranch) => branch.remote && branch.name !== state.branch,
-					tags: () => false,
-				},
+				filter: (branch: GitBranch) => branch.remote && branch.name !== state.branch,
+				resetTitle: 'Reset Merge Target',
+				resetDescription: `Reset to "${detectedMergeTarget}"`,
 			});
 			if (result === StepResultBreak) {
 				continue;
 			}
-			if (result && state.branch) {
+			if (state.branch) {
 				await this.container.git
 					.branches(state.repo.path)
-					.setUserDefinedBaseBranchName?.(state.branch, result.name);
+					.setUserDefinedBaseBranchName?.(state.branch, result?.name);
 			}
 
 			endSteps(state);

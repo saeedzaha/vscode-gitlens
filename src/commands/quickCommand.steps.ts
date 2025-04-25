@@ -783,6 +783,68 @@ export function* pickBranchStep<
 	return canPickStepContinue(step, state, selection) ? selection[0].item : StepResultBreak;
 }
 
+export function* pickOrResetBranchStep<
+	State extends PartialStepState & { repo: Repository },
+	Context extends { repos: Repository[]; showTags?: boolean; title: string },
+>(
+	state: State,
+	context: Context,
+	{
+		filter,
+		picked,
+		placeholder,
+		title,
+		resetTitle,
+		resetDescription,
+	}: {
+		filter?: (b: GitBranch) => boolean;
+		picked?: string | string[];
+		placeholder: string;
+		title?: string;
+		resetTitle: string;
+		resetDescription: string;
+	},
+): StepResultGenerator<GitBranchReference> {
+	const items = getBranches(state.repo, {
+		buttons: [RevealInSideBarQuickInputButton],
+		filter: filter,
+		picked: picked,
+	}).then(branches =>
+		branches.length === 0
+			? [createDirectiveQuickPickItem(Directive.Back, true), createDirectiveQuickPickItem(Directive.Cancel)]
+			: [
+					...branches,
+					createDirectiveQuickPickItem(Directive.Reset, true, {
+						label: resetTitle,
+						description: resetDescription,
+					}),
+			  ],
+	);
+
+	const step = createPickStep<BranchQuickPickItem>({
+		title: appendReposToTitle(title ?? context.title, state, context),
+		placeholder: count => (!count ? `No branches found in ${state.repo.formattedName}` : placeholder),
+		matchOnDetail: true,
+		items: items,
+		onDidClickItemButton: (_quickpick, button, { item }) => {
+			if (button === RevealInSideBarQuickInputButton) {
+				void BranchActions.reveal(item, { select: true, focus: false, expand: true });
+			}
+		},
+		keys: ['right', 'alt+right', 'ctrl+right'],
+		onDidPressKey: async (_quickpick, _key, { item }) => {
+			await BranchActions.reveal(item, {
+				select: true,
+				focus: false,
+				expand: true,
+			});
+		},
+	});
+
+	const selection: StepSelection<typeof step> = yield step;
+	return canPickStepContinue(step, state, selection) ? selection[0].item : StepResultBreak;
+}
+
 export function* pickBranchesStep<
 	State extends PartialStepState & { repo: Repository },
 	Context extends { repos: Repository[]; showTags?: boolean; title: string },
